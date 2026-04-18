@@ -13,11 +13,10 @@ type ArrowButtonProps = {
 };
 
 export const ArrowButton = forwardRef<HTMLDivElement, ArrowButtonProps>(
-	({ isOpen, onClick }, ref) => {
+	({ isOpen, onClick }) => {
 		return (
 			/* Не забываем указаывать role и aria-label атрибуты для интерактивных элементов */
 			<div
-				ref={ref}
 				role='button'
 				aria-label='Открыть/Закрыть форму параметров статьи'
 				tabIndex={0}
@@ -32,4 +31,3 @@ export const ArrowButton = forwardRef<HTMLDivElement, ArrowButtonProps>(
 		);
 	}
 );
-

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import clsx from 'clsx';
@@ -20,29 +20,29 @@ import { Separator } from 'src/ui/separator';
 import { Text } from 'src/ui/text';
 
 type ArticleParamsProps = {
-	isOpen: boolean;
-	onToggle: () => void;
-	onClose: () => void;
-	formSettings: ArticleStateType;
-	changeSettings: (key: keyof ArticleStateType, value: OptionType) => void;
-	applySettings: () => void;
-	resetSettings: () => void;
+	initialSettings: ArticleStateType;
+	defaultSettings: ArticleStateType;
+	onApply: (settings: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = ({
-	isOpen,
-	onToggle,
-	onClose,
-	formSettings,
-	changeSettings,
-	applySettings,
-	resetSettings,
+	initialSettings,
+	defaultSettings,
+	onApply,
 }: ArticleParamsProps) => {
+	const [isSidebarOpen, setOpen] = useState<boolean>(false);
+	const [formSettings, setFormSettings] =
+		useState<ArticleStateType>(initialSettings);
+
 	const asideRef = useRef<HTMLElement | null>(null);
 	const arrowRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		if (!isOpen) {
+		setFormSettings(initialSettings);
+	}, [initialSettings]);
+
+	useEffect(() => {
+		if (!isSidebarOpen) {
 			return;
 		}
 
@@ -61,23 +61,39 @@ export const ArticleParamsForm = ({
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen, onClose]);
+	}, [isSidebarOpen, onClose]);
+
+	function onToggle() {
+		setOpen((prev) => !prev);
+	}
+	function onClose() {
+		setOpen(false);
+	}
+
+	function changeSettings(key: keyof ArticleStateType, value: OptionType) {
+		setFormSettings((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	}
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		applySettings();
+		onApply(formSettings);
 	}
 	function handleReset(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		resetSettings();
+		onApply(defaultSettings);
 	}
 
 	return (
 		<>
-			<ArrowButton ref={arrowRef} isOpen={isOpen} onClick={onToggle} />
+			<ArrowButton ref={arrowRef} isOpen={isSidebarOpen} onClick={onToggle} />
 			<aside
 				ref={asideRef}
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isSidebarOpen,
+				})}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
